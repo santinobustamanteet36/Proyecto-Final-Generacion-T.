@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CanchaYa — Reservá tu cancha</title>
+<link rel="icon" href="../logo.svg" type="image/svg+xml">
+<style>
+  :root{
+    --verde:#0f5132; --verde2:#1f7a4d; --verde-claro:#e7f4ec;
+    --amarillo:#facc15; --fondo:#f4f7f5; --texto:#16231c; --gris:#6b7a72;
+    --borde:#d8e3dc; --rojo:#b42318; --rojo-bg:#fdecea; --blanco:#fff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--fondo);color:var(--texto)}
+  header{background:var(--verde);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:14px}
+  header img{width:46px;height:46px;border-radius:12px}
+  header h1{margin:0;font-size:22px;letter-spacing:.3px}
+  header p{margin:2px 0 0;font-size:13px;opacity:.85}
+  main{max-width:1100px;margin:20px auto;padding:0 16px;display:grid;grid-template-columns:340px 1fr;gap:18px}
+  @media(max-width:860px){main{grid-template-columns:1fr}}
+  .card{background:var(--blanco);border:1px solid var(--borde);border-radius:14px;padding:16px}
+  .card h2{margin:0 0 12px;font-size:16px;color:var(--verde)}
+  label{display:block;font-size:12px;font-weight:600;color:var(--gris);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.4px}
+  input,select{width:100%;padding:10px;border:1px solid var(--borde);border-radius:9px;font-size:15px;background:#fff;color:var(--texto)}
+  input:focus,select:focus{outline:2px solid var(--verde2);border-color:transparent}
+  .precio{margin:14px 0;padding:12px;border-radius:10px;background:var(--verde-claro);display:flex;justify-content:space-between;align-items:center}
+  .precio b{font-size:22px;color:var(--verde)}
+  .precio small{color:var(--gris);display:block;font-size:11px}
+  button{cursor:pointer;border:0;border-radius:9px;font-size:15px;font-weight:700;padding:11px 14px}
+  .btn-main{width:100%;background:var(--amarillo);color:#2b2300}
+  .btn-main:hover{filter:brightness(.95)}
+  .btn-cancel{background:var(--rojo-bg);color:var(--rojo);padding:7px 11px;font-size:13px}
+  .btn-cancel:hover{filter:brightness(.96)}
+  .reglas{font-size:12px;color:var(--gris);margin-top:12px;line-height:1.5}
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  .toolbar input{width:auto}
+  .leyenda{display:flex;gap:12px;font-size:12px;color:var(--gris);margin-left:auto}
+  .leyenda span::before{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .l-libre::before{background:var(--verde-claro);border:1px solid var(--verde2)}
+  .l-ocupado::before{background:#e5e7eb}
+  .l-sel::before{background:var(--amarillo)}
+  table{width:100%;border-collapse:separate;border-spacing:5px}
+  th{font-size:12px;color:var(--gris);font-weight:700;padding:4px}
+  td.hora{font-weight:700;font-size:13px;color:var(--gris);text-align:right;padding-right:8px;white-space:nowrap}
+  td.slot{border-radius:8px;text-align:center;font-size:12px;padding:9px 4px;height:44px}
+  td.libre{background:var(--verde-claro);color:var(--verde);cursor:pointer;border:1px solid var(--verde2);font-weight:600}
+  td.libre:hover{background:#d3ecdd}
+  td.ocupado{background:#e5e7eb;color:#6b7280}
+  td.pasado{background:#f3f4f6;color:#c0c4ca}
+  td.sel{background:var(--amarillo);border-color:#c9a400;color:#2b2300}
+  .reserva{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--borde)}
+  .reserva:last-child{border-bottom:0}
+  .reserva .info{flex:1}
+  .reserva .info b{display:block}
+  .reserva .info span{font-size:13px;color:var(--gris)}
+  .tag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px}
+  .tag.activa{background:var(--verde-claro);color:var(--verde)}
+  .tag.cancelada{background:#e5e7eb;color:#6b7280}
+  .vacio{color:var(--gris);font-size:14px;padding:8px 0}
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(30px);padding:12px 18px;border-radius:10px;color:#fff;font-weight:600;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;text-align:center;z-index:9}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #toast.ok{background:var(--verde)}
+  #toast.err{background:var(--rojo)}
+  .col{display:flex;flex-direction:column;gap:18px}
+</style>
+</head>
+<body>
+<header>
+  <img src="../logo.svg" alt="Logo CanchaYa">
+  <div>
+    <h1>CanchaYa</h1>
+    <p>Reservá tu cancha de fútbol 5 en un toque</p>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Reservar turno</h2>
+    <label for="nombre">Tu nombre</label>
+    <input id="nombre" placeholder="Ej: Santino" autocomplete="off">
+    <label for="tipo">Tipo de jugador</label>
+    <select id="tipo">
+      <option value="regular">Regular</option>
+      <option value="socio">Socio (-20%)</option>
+    </select>
+    <label for="fecha">Fecha</label>
+    <input id="fecha" type="date">
+    <label for="cancha">Cancha</label>
+    <select id="cancha"></select>
+    <label for="hora">Horario</label>
+    <select id="hora"></select>
+
+    <div class="precio">
+      <div><small>Precio del turno</small><b id="precio">—</b></div>
+      <small id="detalle" style="text-align:right"></small>
+    </div>
+    <button class="btn-main" id="btnReservar">Reservar</button>
+
+    <div class="reglas">
+      <b>Reglas:</b> turnos de 1 h de 10 a 23 · pico desde las 18 · finde +15% · máx. 3 reservas activas (5 socios) · 1 por día · cancelás hasta 12 h antes.
+    </div>
+  </section>
+
+  <div class="col">
+    <section class="card">
+      <h2>Disponibilidad</h2>
+      <div class="toolbar">
+        <input id="fechaGrilla" type="date">
+        <div class="leyenda"><span class="l-libre">Libre</span><span class="l-ocupado">Ocupada</span><span class="l-sel">Elegida</span></div>
+      </div>
+      <div id="grilla"></div>
+    </section>
+
+    <section class="card">
+      <h2>Mis reservas <small id="quien" style="color:var(--gris);font-weight:400"></small></h2>
+      <div id="misReservas"></div>
+    </section>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<script src="reglas.js"></script>
+<script>
+(function () {
+  var R = window.CanchaYa;
+  var KEY = "canchaya.reservas";
+  var DIAS = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ---------- estado ----------
+  function cargar() {
+    try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; }
+  }
+  function guardar(reservas) {
+    try { localStorage.setItem(KEY, JSON.stringify(reservas)); } catch (e) {}
+  }
+  var reservas = cargar();
+  var seleccion = { canchaId: 1, hora: 20 };
+
+  // ---------- utilidades ----------
+  function pesos(n) { return "$" + n.toLocaleString("es-AR"); }
+  function hh(h) { return String(h).padStart(2, "0") + ":00"; }
+  function nombreFecha(f) {
+    var p = f.split("-");
+    var d = new Date(+p[0], +p[1] - 1, +p[2]);
+    return DIAS[d.getDay()] + " " + p[2] + "/" + p[1];
+  }
+  function nombreCancha(id) {
+    return R.CONFIG.CANCHAS.filter(function (c) { return c.id === id; })[0].nombre;
+  }
+  var toastTimer;
+  function toast(msg, tipo) {
+    var t = $("toast");
+    t.textContent = msg;
+    t.className = "show " + tipo;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.className = ""; }, 3200);
+  }
+
+  // ---------- inicialización de controles ----------
+  var hoy = new Date();
+  var hoyStr = R.formatoFecha(hoy);
+  var maxD = new Date(hoy.getTime()); maxD.setDate(maxD.getDate() + R.CONFIG.DIAS_ANTICIPACION);
+  var maxStr = R.formatoFecha(maxD);
+
+  ["fecha", "fechaGrilla"].forEach(function (id) {
+    $(id).min = hoyStr; $(id).max = maxStr; $(id).value = hoyStr;
+  });
+
+  R.CONFIG.CANCHAS.forEach(function (c) {
+    var o = document.createElement("option"); o.value = c.id; o.textContent = c.nombre; $("cancha").appendChild(o);
+  });
+  for (var h = R.CONFIG.HORA_APERTURA; h <= R.CONFIG.HORA_ULTIMO_TURNO; h++) {
+    var o = document.createElement("option"); o.value = h; o.textContent = hh(h) + " a " + hh(h + 1); $("hora").appendChild(o);
+  }
+  $("hora").value = seleccion.hora;
+
+  // ---------- precio en vivo ----------
+  function actualizarPrecio() {
+    var fecha = $("fecha").value, hora = +$("hora").value, tipo = $("tipo").value;
+    if (!fecha) { $("precio").textContent = "—"; $("detalle").textContent = ""; return; }
+    $("precio").textContent = pesos(R.calcularPrecio(fecha, hora, tipo));
+    var partes = [hora >= R.CONFIG.HORA_INICIO_PICO ? "Horario pico" : "Horario valle"];
+    if (R.esFinDeSemana(fecha)) partes.push("finde +15%");
+    if (tipo === "socio") partes.push("socio -20%");
+    $("detalle").textContent = partes.join(" · ");
+  }
+
+  // ---------- grilla ----------
+  function renderGrilla() {
+    var fecha = $("fechaGrilla").value;
+    if (!fecha) { $("grilla").innerHTML = '<div class="vacio">Elegí una fecha.</div>'; return; }
+    var ahora = new Date();
+    var html = "<table><thead><tr><th></th>";
+    R.CONFIG.CANCHAS.forEach(function (c) { html += "<th>" + c.nombre + "</th>"; });
+    html += "</tr></thead><tbody>";
+    for (var h = R.CONFIG.HORA_APERTURA; h <= R.CONFIG.HORA_ULTIMO_TURNO; h++) {
+      html += '<tr><td class="hora">' + hh(h) + "</td>";
+      R.CONFIG.CANCHAS.forEach(function (c) {
+        var inicio = R.inicioTurno(fecha, h);
+        var ocupada = R.estaOcupado(reservas, c.id, fecha, h);
+        var esSel = fecha === $("fecha").value && seleccion.canchaId === c.id && seleccion.hora === h;
+        if (inicio.getTime() <= ahora.getTime()) {
+          html += '<td class="slot pasado">—</td>';
+        } else if (ocupada) {
+          var r = reservas.filter(function (x) { return x.estado === "activa" && x.canchaId === c.id && x.fecha === fecha && x.hora === h; })[0];
+          html += '<td class="slot ocupado">' + (r ? r.jugador : "Ocupada") + "</td>";
+        } else {
+          html += '<td class="slot libre' + (esSel ? " sel" : "") + '" data-c="' + c.id + '" data-h="' + h + '">' +
+                  pesos(R.calcularPrecio(fecha, h, $("tipo").value)) + "</td>";
+        }
+      });
+      html += "</tr>";
+    }
+    html += "</tbody></table>";
+    $("grilla").innerHTML = html;
+  }
+
+  $("grilla").addEventListener("click", function (e) {
+    var td = e.target.closest("td.libre");
+    if (!td) return;
+    seleccion = { canchaId: +td.dataset.c, hora: +td.dataset.h };
+    $("cancha").value = seleccion.canchaId;
+    $("hora").value = seleccion.hora;
+    $("fecha").value = $("fechaGrilla").value;
+    actualizarPrecio();
+    renderGrilla();
+  });
+
+  // ---------- mis reservas ----------
+  function renderMisReservas() {
+    var nombre = $("nombre").value.trim().toLowerCase();
+    $("quien").textContent = nombre ? "— " + $("nombre").value.trim() : "";
+    var cont = $("misReservas");
+    if (!nombre) { cont.innerHTML = '<div class="vacio">Escribí tu nombre para ver tus reservas.</div>'; return; }
+    var mias = reservas.filter(function (r) { return r.jugador.toLowerCase() === nombre; })
+      .sort(function (a, b) { return a.fecha.localeCompare(b.fecha) || a.hora - b.hora; });
+    if (!mias.length) { cont.innerHTML = '<div class="vacio">Todavía no tenés reservas.</div>'; return; }
+    cont.innerHTML = mias.map(function (r) {
+      return '<div class="reserva"><div class="info"><b>' + nombreCancha(r.canchaId) + " · " + nombreFecha(r.fecha) + " · " + hh(r.hora) +
+        "</b><span>" + pesos(r.precio) + " · " + (r.tipoJugador === "socio" ? "Socio" : "Regular") + '</span></div>' +
+        '<span class="tag ' + r.estado + '">' + (r.estado === "activa" ? "Activa" : "Cancelada") + "</span>" +
+        (r.estado === "activa" ? '<button class="btn-cancel" data-id="' + r.id + '">Cancelar</button>' : "") + "</div>";
+    }).join("");
+  }
+
+  $("misReservas").addEventListener("click", function (e) {
+    var b = e.target.closest(".btn-cancel");
+    if (!b) return;
+    var res = R.cancelarReserva(reservas, +b.dataset.id, new Date());
+    if (!res.ok) { toast(res.error, "err"); return; }
+    reservas = res.reservas; guardar(reservas);
+    toast("Reserva cancelada. El turno quedó libre.", "ok");
+    refrescar();
+  });
+
+  // ---------- reservar ----------
+  $("btnReservar").addEventListener("click", function () {
+    var res = R.crearReserva(reservas, {
+      canchaId: +$("cancha").value,
+      jugador: $("nombre").value,
+      tipoJugador: $("tipo").value,
+      fecha: $("fecha").value,
+      hora: +$("hora").value
+    }, new Date());
+    if (!res.ok) { toast(res.error, "err"); return; }
+    reservas = res.reservas; guardar(reservas);
+    var r = res.reserva;
+    toast("¡Listo! " + nombreCancha(r.canchaId) + ", " + nombreFecha(r.fecha) + " " + hh(r.hora) + " · " + pesos(r.precio), "ok");
+    $("fechaGrilla").value = r.fecha;
+    refrescar();
+  });
+
+  function refrescar() { actualizarPrecio(); renderGrilla(); renderMisReservas(); }
+
+  // ---------- eventos ----------
+  $("fecha").addEventListener("change", function () { $("fechaGrilla").value = $("fecha").value; refrescar(); });
+  $("fechaGrilla").addEventListener("change", renderGrilla);
+  $("cancha").addEventListener("change", function () { seleccion.canchaId = +$("cancha").value; refrescar(); });
+  $("hora").addEventListener("change", function () { seleccion.hora = +$("hora").value; refrescar(); });
+  $("tipo").addEventListener("change", refrescar);
+  $("nombre").addEventListener("input", renderMisReservas);
+
+  refrescar();
+})();
+</script>
+</body>
+</html>

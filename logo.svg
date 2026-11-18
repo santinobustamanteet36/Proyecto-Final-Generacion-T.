@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Logo CanchaYa">
+  <rect width="256" height="256" rx="48" fill="#0f5132"/>
+  <!-- líneas de cancha -->
+  <g fill="none" stroke="#1f7a4d" stroke-width="4">
+    <rect x="28" y="28" width="200" height="200" rx="24"/>
+    <line x1="28" y1="128" x2="228" y2="128"/>
+    <circle cx="128" cy="128" r="34"/>
+  </g>
+  <!-- pin de ubicación -->
+  <path d="M128 40c-37 0-66 29-66 66 0 48 66 110 66 110s66-62 66-110c0-37-29-66-66-66z" fill="#facc15"/>
+  <!-- pelota -->
+  <circle cx="128" cy="106" r="34" fill="#ffffff"/>
+  <polygon points="128,86 146,99 139,120 117,120 110,99" fill="#0f5132"/>
+  <g stroke="#0f5132" stroke-width="3" stroke-linecap="round">
+    <line x1="128" y1="86" x2="128" y2="74"/>
+    <line x1="146" y1="99" x2="157" y2="94"/>
+    <line x1="139" y1="120" x2="146" y2="130"/>
+    <line x1="117" y1="120" x2="110" y2="130"/>
+    <line x1="110" y1="99" x2="99" y2="94"/>
+  </g>
+</svg>

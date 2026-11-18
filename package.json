@@ -1,0 +1,13 @@
+{
+  "name": "canchaya",
+  "version": "1.0.0",
+  "description": "CanchaYa — reserva de canchas de fútbol 5, desarrollada con Spec-Driven Development",
+  "scripts": {
+    "test": "node tests/reglas.test.js",
+    "test:ui": "node tests/ui.test.js"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.0"
+  },
+  "license": "MIT"
+}
